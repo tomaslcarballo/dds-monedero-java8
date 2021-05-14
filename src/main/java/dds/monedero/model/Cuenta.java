@@ -12,7 +12,7 @@ import java.util.List;
 public class Cuenta {
 
   private double saldo = 0;
-  private List<Movimiento> movimientos  = new ArrayList<>();
+  private List<Movimiento> movimientos = new ArrayList<>();
 
   public Cuenta() {
     saldo = 0;
@@ -27,29 +27,25 @@ public class Cuenta {
   }
 
   public void poner(double cuanto) {
-    if (cuanto <= 0) {
-      throw new MontoNegativoException(cuanto + ": el monto a ingresar debe ser un valor positivo");
-    }
+
+    montNegativo(cuanto);
 
     if (getMovimientos().stream().filter(movimiento -> movimiento.isDeposito()).count() >= 3) {
       //Esto deberia estar abstraido en un nuevo metodo
       throw new MaximaCantidadDepositosException("Ya excedio los " + 3 + " depositos diarios");
     }
-      Deposito deposito = new Deposito(LocalDate.now(),cuanto);
-      movimientos.add(deposito);
-      this.setSaldo(deposito.calcularValor(this));
-    }
+    Deposito deposito = new Deposito(LocalDate.now(), cuanto);
+    movimientos.add(deposito);
+    this.setSaldo(deposito.calcularValor(this));
+  }
 
-    //new Deposito(LocalDate.now(), cuanto).agregateA(this);
-    //En vez de poner deposito true puedo hacer una subclase de
-    //Porque no uso directamente agregarMovimiento?
+  //Porque no uso directamente agregarMovimiento?
 
 
   public void sacar(double cuanto) {
-    if (cuanto <= 0) {
-      throw new MontoNegativoException(cuanto + ": el monto a ingresar debe ser un valor positivo");
-      //Como este codigo se repite 2 veces lo abstraeris en un nuevo metodo llamado verificar
-    }
+
+    montNegativo(cuanto);
+
     if (getSaldo() - cuanto < 0) {
       throw new SaldoMenorException("No puede sacar mas de " + getSaldo() + " $");
     }
@@ -60,19 +56,15 @@ public class Cuenta {
           + " diarios, límite: " + limite);
     }
 
-    Extraccion extraccion = new Extraccion(LocalDate.now(),cuanto);
+    Extraccion extraccion = new Extraccion(LocalDate.now(), cuanto);
     movimientos.add(extraccion);
     this.setSaldo(extraccion.calcularValor(this));
 
     //new Extraccion(LocalDate.now(), cuanto).agregateA(this);
     //Quizas puedo hacer un metodo agregar Movimiento a cuenta
   }
-/*
-  public void agregarMovimiento(LocalDate fecha, double cuanto) {
-    Movimiento movimiento = new Movimiento(fecha, cuanto);
-    movimientos.add(movimiento);
-  }
-*/
+
+
   public double getMontoExtraidoA(LocalDate fecha) {
     return getMovimientos().stream()
         .filter(movimiento -> !movimiento.isDeposito() && movimiento.getFecha().equals(fecha))
@@ -92,5 +84,9 @@ public class Cuenta {
     this.saldo = saldo;
   }
 
-
+  public void montNegativo(double cuanto) {
+    if (cuanto <= 0) {
+      throw new MontoNegativoException(cuanto + ": el monto a ingresar debe ser un valor positivo");
+    }
+  }
 }
