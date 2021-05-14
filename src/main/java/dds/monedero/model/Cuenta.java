@@ -28,23 +28,18 @@ public class Cuenta {
 
   public void poner(double cuanto) {
 
-    montNegativo(cuanto);
+    montoNegativo(cuanto);
+    excedeDepositosDiarios();
 
-    if (getMovimientos().stream().filter(movimiento -> movimiento.isDeposito()).count() >= 3) {
-      //Esto deberia estar abstraido en un nuevo metodo
-      throw new MaximaCantidadDepositosException("Ya excedio los " + 3 + " depositos diarios");
-    }
     Deposito deposito = new Deposito(LocalDate.now(), cuanto);
     movimientos.add(deposito);
     this.setSaldo(deposito.calcularValor(this));
   }
 
-  //Porque no uso directamente agregarMovimiento?
-
 
   public void sacar(double cuanto) {
 
-    montNegativo(cuanto);
+    montoNegativo(cuanto);
 
     if (getSaldo() - cuanto < 0) {
       throw new SaldoMenorException("No puede sacar mas de " + getSaldo() + " $");
@@ -60,8 +55,6 @@ public class Cuenta {
     movimientos.add(extraccion);
     this.setSaldo(extraccion.calcularValor(this));
 
-    //new Extraccion(LocalDate.now(), cuanto).agregateA(this);
-    //Quizas puedo hacer un metodo agregar Movimiento a cuenta
   }
 
 
@@ -84,9 +77,20 @@ public class Cuenta {
     this.saldo = saldo;
   }
 
-  public void montNegativo(double cuanto) {
+  public void montoNegativo(double cuanto) {
     if (cuanto <= 0) {
       throw new MontoNegativoException(cuanto + ": el monto a ingresar debe ser un valor positivo");
     }
   }
+
+  public void excedeDepositosDiarios() {
+    if (this.cantidadMovimientos()>=3) {
+      throw new MaximaCantidadDepositosException("Ya excedio los " + 3 + " depositos diarios");
+    }
+  }
+
+  public double cantidadMovimientos() {
+    return getMovimientos().stream().filter(Movimiento::isDeposito).count();
+  }
+
 }
