@@ -11,7 +11,7 @@ import java.util.List;
 
 public class Cuenta {
 
-  private double saldo = 0;
+  private double saldo;
   private List<Movimiento> movimientos = new ArrayList<>();
 
   public Cuenta() {
@@ -22,20 +22,14 @@ public class Cuenta {
     saldo = montoInicial;
   }
 
-  public void setMovimientos(List<Movimiento> movimientos) {
-    this.movimientos = movimientos;
-  }
-
   public void poner(double cuanto) {
 
     montoNegativo(cuanto);
     excedeDepositosDiarios();
 
     Deposito deposito = new Deposito(LocalDate.now(), cuanto);
-    movimientos.add(deposito);
-    this.setSaldo(deposito.calcularValor(this));
+    agregarMovimiento(deposito);
   }
-
 
   public void sacar(double cuanto) {
 
@@ -52,8 +46,7 @@ public class Cuenta {
     }
 
     Extraccion extraccion = new Extraccion(LocalDate.now(), cuanto);
-    movimientos.add(extraccion);
-    this.setSaldo(extraccion.calcularValor(this));
+    agregarMovimiento(extraccion);
 
   }
 
@@ -91,6 +84,11 @@ public class Cuenta {
 
   public double cantidadMovimientos() {
     return getMovimientos().stream().filter(Movimiento::isDeposito).count();
+  }
+
+  void agregarMovimiento(Movimiento movimiento){
+    movimientos.add(movimiento);
+    this.setSaldo(movimiento.calcularValor(this));
   }
 
 }
