@@ -39,7 +39,7 @@ public class MonederoTest {
   }
 
   @Test
-  void MasDeTresDepositos() {
+  void NoSePuedenRealizarMasDeTresDepositos() {
     assertThrows(MaximaCantidadDepositosException.class, () -> {
           cuenta.poner(1500);
           cuenta.poner(456);
@@ -65,8 +65,25 @@ public class MonederoTest {
   }
 
   @Test
+  public void SiSeExtraeDineroSeRestaDelLimite(){
+    assertThrows(MaximoExtraccionDiarioException.class, () -> {
+      cuenta.setSaldo(2000);
+      cuenta.sacar(400);
+      cuenta.sacar(700);
+    });
+  }
+
+  @Test
   public void NoSePuedeExtraerMontoNegativo() {
     assertThrows(MontoNegativoException.class, () -> cuenta.sacar(-500));
   }
 
+  @Test
+  public void SiSeAgregaDineroYSeSacaHay2Movimientos(){
+    cuenta.setSaldo(0);
+    cuenta.poner(1000);
+    cuenta.sacar(500);
+    assertEquals(cuenta.getMovimientos().size(),2 );
+  }
 }
+
